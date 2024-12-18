@@ -1,12 +1,9 @@
-import type { UsersRepository } from "@/repositories/users-repository";
-import { InvalidCredentialError } from "./errors/invalid-credential-error";
-import { compare } from "bcryptjs";
 import type { CheckIn } from "@prisma/client";
 import type { CheckInsRepository } from "@/repositories/check-ins-repository";
 
 interface CheckInUseCaseRequest {
-  userId: string
-  gymId: string
+  userId: string;
+  gymId: string;
 }
 
 interface CheckInUseCaseResponse {
@@ -14,19 +11,28 @@ interface CheckInUseCaseResponse {
 }
 
 export class CheckInUseCase {
-  static execute(arg0: { email: string; password: string; }) {
+  static execute(arg0: { email: string; password: string }) {
     throw new Error("Method not implemented.");
   }
-  constructor(private checkInsRepository: CheckInsRepository){}
+  constructor(private checkInsRepository: CheckInsRepository) {}
   async execute({
     userId,
-    gymId
+    gymId,
   }: CheckInUseCaseRequest): Promise<CheckInUseCaseResponse> {
+    const checkInOnSomaDay = await this.checkInsRepository.findByUserIdOnDate(
+      userId,
+      new Date()
+    );
+
+    if (checkInOnSomaDay) {
+      throw new Error();
+    }
+
     const checkIn = await this.checkInsRepository.create({
       gym_id: gymId,
-      user_id: userId
-    })
-    
+      user_id: userId,
+    });
+
     return {
       checkIn,
     };
