@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { UserAlreadyExistsError } from "@/services/errors/user-already-exists-error";
-import MakeAuthenticateUseCase from "@/services/factories/make-authenticate-use-case";
+import {makeAuthenticateUseCase} from "@/services/factories/make-authenticate-use-case";
 
 export async function authenticate(
   request: FastifyRequest,
@@ -15,7 +15,7 @@ export async function authenticate(
   const { email, password } = authenticateBodySchema.parse(request.body);
 
   try {
-    const authenticateUseCase = MakeAuthenticateUseCase();
+    const authenticateUseCase = makeAuthenticateUseCase();
 
     const { user } = await authenticateUseCase.execute({
       email,
@@ -27,13 +27,18 @@ export async function authenticate(
       {
         sign: {
           sub: user.id,
+          expiresIn: '7d'
         },
       }
     );
 
+    console.log(token)
+
     return reply.status(200).send({
       token,
     });
+
+    
   } catch (error) {
     if (error instanceof UserAlreadyExistsError) {
       return reply.status(400).send({ message: error.message });

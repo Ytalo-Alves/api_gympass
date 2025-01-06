@@ -3,11 +3,11 @@ import { z } from "zod";
 import { UserAlreadyExistsError } from "@/services/errors/user-already-exists-error";
 import MakeRegisterUseCase from "@/services/factories/make-register-use-case";
 
-export async function register(request: FastifyRequest, reply: FastifyReply) {
+export async function create(request: FastifyRequest, reply: FastifyReply) {
   const registerBodySchema = z.object({
     name: z.string(),
     email: z.string().email(),
-    password: z.string().min(6),
+    password: z.string(),
   });
 
   const { name, email, password } = registerBodySchema.parse(request.body);
@@ -28,5 +28,5 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     throw error;
   }
 
-  return reply.status(201).send({ message: "User created successfully" });
+  return reply.status(201).send();
 }
